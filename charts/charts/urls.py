@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^$','happycharts.views.home'),
-    url(r'^getenergydata$','happycharts.views.getenergyconsuption'),
+    url(r'^getenergydata$','happycharts.views.getenergycomsuption'),
     url(r'^getmeters$','happycharts.views.getmeters'),
     url(r'^getinstance$','happycharts.views.ceilometer_get_instances'),
     url(r'^charts/$','happycharts.views.init'),

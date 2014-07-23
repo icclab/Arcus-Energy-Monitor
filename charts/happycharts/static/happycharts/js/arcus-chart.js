@@ -13,9 +13,9 @@
 //    License for the specific language governing permissions and limitations
 //    under the License.
 function init(){
-  $('#start_date').datepicker({dateFormat: 'yy-mm-dd', minDate: -30, maxDate: +30, showOtherMonths: true,
+  $('#start_date').datepicker({dateFormat: 'yy-mm-dd', showOtherMonths: true,
                                selectOtherMonths: true});
-  $('#end_date').datepicker({dateFormat: 'yy-mm-dd', minDate: -30, maxDate: +30,  showOtherMonths: true,
+  $('#end_date').datepicker({dateFormat: 'yy-mm-dd',  showOtherMonths: true,
                              selectOtherMonths: true});
   $("#bkground").hide();
   $("#container").hide();
@@ -68,12 +68,12 @@ function callbackEnergy(data) {
   else timeout();
 }
 
+
 function timeout() {
   var error = "Without Response." ;
   alert( "Request Failed: " + error );
   $("#bkground").hide();
 }
-
 
 
 function checkFunction(){
@@ -120,29 +120,36 @@ function checkFunction(){
 }
 
 function callbackInstance(data){
-  $( "#section" ).accordion({
-     heightStyle: "content",
-     collapsible: true
-   });
   var instance = [];
   var i = 0
   if (data.status == 1){
+    var newDiv = "<h3> Instances - "+ data.insts_active +" Active</h3><div>"
     $.each( data.response, function( key, val ) {
-      var newDiv = "<h3>VM - "+ data.resource[i] +"</h3><div> <center><table> <tr> <th class=\"ui-state-default\">User ID</th>\
-                                                  <th class=\"ui-state-default\">Project ID</th>\
-                                                  <th class=\"ui-state-default\">Flavor Name</th>\
-                                                  <th class=\"ui-state-default\">Image Name</th>\
-                                                  <th class=\"ui-state-default\">Display Name</th></tr><tr>";
+      newDiv = newDiv + "<div class=\"accordian\">" +
+                            "<h3>VM - "+ data.resource_activity[i].id + " Activity:" + data.resource_activity[i].activity + "%</h3>" +
+                                "<div> <center>" + 
+                                     "<table> <tr> <th class=\"ui-state-default\">User ID</th>\
+                                              <th class=\"ui-state-default\">Project ID</th>\
+                                              <th class=\"ui-state-default\">Flavor Name</th>\
+                                              <th class=\"ui-state-default\">Image Name</th>\
+                                              <th class=\"ui-state-default\">Display Name</th></tr><tr>";
       i = i + 1;
       $.each( val, function( key, val2 ) {
         newDiv = newDiv + "<td class=\"ui-widget-content\">" + val2 + "</td>";
         });
-      newDiv = newDiv + "</tr></table></div>";
-      $('#section').append(newDiv);
-      $('#section').accordion("refresh");
+      newDiv = newDiv + "</tr></table></div></div>";
     });
+    newDiv = newDiv + "</div>"
+    $('#section').append(newDiv);
   }
-
+  $("div.accordian").accordion({
+    autoHeight: true,
+    heightStyle: "content",
+    collapsible: true,
+    active: false,
+    initialIndex: null,
+    tabs: '> h3'
+    });
 }
 
 function progressbar() {
@@ -157,12 +164,16 @@ function ok(){
   $("#section").show();
 }
 function click(){
-  $("#sections").accordion("destroy");
+  var test = $("#section").is(":visible")
+  if (test){
+    $("#section").accordion("destroy");
+      };
   $("#section").empty();
   $("#bkground").show();
   $("#container").hide();
   $("#section").hide();
 }
+
 function charts(meterdate, total) {
   ok();
   chart = new Highcharts.Chart({
