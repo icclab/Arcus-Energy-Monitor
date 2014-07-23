@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+# Copyright 2014 Zuercher Hochschule fuer Angewandte Wissenschaften
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+       -->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        {% load static %}
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/redmond/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}happycharts/css/base.css">
+        <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}happycharts/js/highcharts.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}happycharts/js/modules/exporting.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}happycharts/js/arcus-chart.js"></script>
+
+        <title>Happy Charts</title>
+    </head>
+
+    <body>
+        <script>
+            $(document).ready(init);
+        </script>
+        <h1>Happy Charts!</h1>
+        <label>From:</label>
+        <input type="text" id="start_date" name="from">
+        <label>to:</label>
+        <input type="text" id="end_date" name="to">
+        <br>
+        <select id="selectmeters"></select>
+        <div id="bkground">
+            <div id="pbar" style="max-width: 1000px;height: 30px;"></div>
+        </div>
+        <br>
+        <button type="submit" onclick="checkFunction()">Go!</button>
+        <br>
+        <br>
+        <div id="section" style=" width: 1000px; margin: 0 auto"></div>
+        <br>
+        <br>
+        <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+    </body>
+</html>

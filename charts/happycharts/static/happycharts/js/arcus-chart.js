@@ -1,0 +1,213 @@
+// Copyright 2014 Zuercher Hochschule fuer Angewandte Wissenschaften
+// All Rights Reserved.
+//
+//    Licensed under the Apache License, Version 2.0 (the "License"); you may
+//    not use this file except in compliance with the License. You may obtain
+//    a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+//    License for the specific language governing permissions and limitations
+//    under the License.
+function init(){
+  $('#start_date').datepicker({dateFormat: 'yy-mm-dd', minDate: -30, maxDate: +30, showOtherMonths: true,
+                               selectOtherMonths: true});
+  $('#end_date').datepicker({dateFormat: 'yy-mm-dd', minDate: -30, maxDate: +30,  showOtherMonths: true,
+                             selectOtherMonths: true});
+  $("#bkground").hide();
+  $("#container").hide();
+  $("#section").hide();
+  progressbar();
+
+  var url = "/getmeters";
+  $.ajax({url: url, dataType:'json', timeout: 60000, success:selectButton, error: timeout});
+}
+
+function selectButton(data){
+  var sel = document.getElementById('selectmeters');
+  var newOption;
+  $.each( data.energy, function( key, val ) {
+    newOption = new Option(val, val);
+    try{
+      sel.add(newOption);
+    }catch(e){
+      sel.appendChild(newOption);
+    }
+    });
+}
+
+function callbackEnergy(data) {
+  var meter = [];
+  var timestamp = [];
+  var date = [];
+  var meterdate = [];
+  if(data.status == 1){
+    $.each( data.response.energy_list, function( key, val ) {
+      meter.push(parseFloat(val));
+    });
+    $.each( data.response.timestamp, function( key, val ) {
+      timestamp.push(new Date(val));
+    });
+    $.each( timestamp, function( key, val ) {
+      var day = val.getDate();
+      var month = val.getMonth();
+      var year = val.getFullYear();
+      var hour = val.getHours();
+      var min = val.getMinutes();
+      var sec = val.getSeconds();
+      date.push(Date.UTC(year, month, day, hour, min, sec));
+    });
+    $.each(date, function( key,val ) {
+      meterdate.push([date[key], meter[key]]);
+    });
+    charts(meterdate, data.sum_length);
+  }
+  else timeout();
+}
+
+function timeout() {
+  var error = "Without Response." ;
+  alert( "Request Failed: " + error );
+  $("#bkground").hide();
+}
+
+
+
+function checkFunction(){
+  var start_date;
+  var end_date;
+  var server;
+  var string = '';
+  var test = false;
+
+  start_date = String($("#start_date").val());
+  end_date = String($("#end_date").val());
+  var sel = document.getElementById('selectmeters');
+  var server = sel.options[sel.selectedIndex].value;
+  var compare = start_date.localeCompare(end_date);
+  if (start_date == ""){
+    string = 'Select a start date.';
+    test = true;
+  }else if (end_date == ""){
+    string = 'Select an end date.';
+    test = true;
+  }else if (server == undefined){
+    string = 'Select a server!';
+    test = true;
+  }else if (compare == 1){
+    string = 'Timestamp Error: Please select a correctly time range.';
+    test = true;
+  }
+  if (test == true){
+    alert(string);
+  }else {
+    try{
+      var data = { start:start_date, end: end_date, server: server};
+      var url = "/getenergydata";
+      $.ajax({url: url, dataType:'json', data: data,timeout: 300000, success:callbackEnergy, error: timeout} );
+      var url2 = "/getinstance";
+      $.ajax({url: url2, dataType:'json', data: data, timeout: 300000, success:callbackInstance, error: timeout} );
+      click();
+    }
+    catch(error){
+      var text = "Error: " + error.message + "\n";
+      alert (text);
+    }
+  }
+}
+
+function callbackInstance(data){
+  $( "#section" ).accordion({
+     heightStyle: "content",
+     collapsible: true
+   });
+  var instance = [];
+  var i = 0
+  if (data.status == 1){
+    $.each( data.response, function( key, val ) {
+      var newDiv = "<h3>VM - "+ data.resource[i] +"</h3><div> <center><table> <tr> <th class=\"ui-state-default\">User ID</th>\
+                                                  <th class=\"ui-state-default\">Project ID</th>\
+                                                  <th class=\"ui-state-default\">Flavor Name</th>\
+                                                  <th class=\"ui-state-default\">Image Name</th>\
+                                                  <th class=\"ui-state-default\">Display Name</th></tr><tr>";
+      i = i + 1;
+      $.each( val, function( key, val2 ) {
+        newDiv = newDiv + "<td class=\"ui-widget-content\">" + val2 + "</td>";
+        });
+      newDiv = newDiv + "</tr></table></div>";
+      $('#section').append(newDiv);
+      $('#section').accordion("refresh");
+    });
+  }
+
+}
+
+function progressbar() {
+  $( "#pbar" ).progressbar({
+    value: false
+  });
+}
+
+function ok(){
+  $("#bkground").hide();
+  $("#container").show();
+  $("#section").show();
+}
+function click(){
+  $("#sections").accordion("destroy");
+  $("#section").empty();
+  $("#bkground").show();
+  $("#container").hide();
+  $("#section").hide();
+}
+function charts(meterdate, total) {
+  ok();
+  chart = new Highcharts.Chart({
+  chart: {
+    renderTo: 'container',
+      defaultSeriesType: 'line',
+  },
+    title: {
+      text: 'Total: ' + total.sum + 'J    ' +
+            'Average:' + total.sum/total.length + 'W',
+        x: -20
+    },
+      subtitle: {
+        text: '',
+          x: -20
+      },
+    xAxis: {
+      type: 'datetime',
+      title: {
+        text: 'Date'
+      }
+    },
+    yAxis: {
+      title: {
+        text: 'Power (W)'
+      },
+      plotLines: [{
+        value: 0,
+        width: 1,
+        color: '#808080'
+      }]
+    },
+    tooltip: {
+      valueSuffix: 'W'
+    },
+    legend: {
+      layout: 'vertical',
+      align: 'right',
+      verticalAlign: 'middle',
+      borderWidth: 0
+    },
+    series: [{
+      name: 'Server',
+      data:  meterdate
+    }],
+
+  });
+}
