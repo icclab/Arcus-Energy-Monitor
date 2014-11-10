@@ -1,8 +1,10 @@
 Arcus-Energy-Monitor
 ====================
 
+- This tool is no longer supported instead go to: https://github.com/icclab/arcus-energy-monitoring-tool
+
 The Arcus energy monitoring tool is a tool to understand how energy is consumed in an Openstack
-cluster. At present, it simply extracts information from Ceilometer (put there via kwapi) and 
+cluster. At present, it simply extracts information from Ceilometer (put there via kwapi) and
 displays it on a reasonably straightforward quite interactive JS based frontend.
 
 We are of course working to make it more feature rich.
